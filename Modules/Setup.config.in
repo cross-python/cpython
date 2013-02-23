@@ -6,6 +6,9 @@
 # init system calls(posix/nt/...) for INITFUNC (used by makesetup)
 @INITSYS@ posixmodule.c
 
+# This is needed to find out the user's home dir if $HOME is not set
+@USE_PWD_MODULE@pwd pwdmodule.c
+
 # Threading
 @USE_THREAD_MODULE@_thread _threadmodule.c
 
