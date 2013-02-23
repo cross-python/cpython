@@ -87,9 +87,25 @@
  * with a semicolon separated path prior to calling Py_Initialize.
  */
 
+#ifndef PYTHONPATH
+#  define PYTHONPATH L".\\DLLs;.\\lib"
+#endif
+
 #ifndef LANDMARK
 #define LANDMARK L"lib\\os.py"
 #endif
+
+#ifdef __MINGW32__
+
+static wchar_t *lib_python = L"lib\\python" VERSION;
+
+#  undef LANDMARK
+#  define LANDMARK L"os.py"
+
+#  define USE_POSIX_PREFIX
+
+#endif
+
 
 static wchar_t prefix[MAXPATHLEN+1];
 static wchar_t progpath[MAXPATHLEN+1];
@@ -172,6 +188,69 @@ join(wchar_t *buffer, wchar_t *stuff)
     wcsncpy(buffer+n, stuff, k);
     buffer[n+k] = '\0';
 }
+
+#ifdef USE_POSIX_PREFIX
+
+/* based on getpath.c but with paths relative to executable */
+/* search_for_prefix requires that path be no more than MAXPATHLEN
+   bytes long.
+   return: 1 if found; -1 if found build directory
+*/
+static int
+search_for_posix_prefix(wchar_t *argv0_path, wchar_t *home, wchar_t *_prefix)
+{
+    size_t n;
+
+    /* If PYTHONHOME is set, we believe it unconditionally */
+    if (home) {
+        wchar_t *delim;
+        wcsncpy(prefix, home, MAXPATHLEN);
+        delim = wcschr(prefix, DELIM);
+        if (delim)
+            *delim = L'\0';
+        join(prefix, lib_python);
+        join(prefix, LANDMARK);
+        return 1;
+    }
+
+    /* Check to see if argv[0] is in the build directory */
+    wcscpy(prefix, argv0_path);
+    join(prefix, L"Modules\\Setup");
+    if (exists(prefix)) {
+        wchar_t *vpath;
+        /* Check source directory if argv0_path is in the build directory. */
+        vpath = _Py_char2wchar(SRCDIR, NULL);
+        if (vpath != NULL) {
+            wcscpy(prefix, argv0_path);
+            join(prefix, vpath);
+            PyMem_Free(vpath);
+            join(prefix, L"Lib");
+            join(prefix, LANDMARK);
+            if (ismodule(prefix))
+                return -1;
+        }
+    }
+
+    /* Search from argv0_path, until root is found */
+    wcscpy(prefix, argv0_path);
+    do {
+        n = wcslen(prefix);
+        join(prefix, lib_python);
+        join(prefix, LANDMARK);
+        if (ismodule(prefix))
+            return 1;
+        prefix[n] = L'\0';
+        reduce(prefix);
+    } while (prefix[0]);
+
+    /* Configure prefix is unused */
+    (void)_prefix;
+
+    /* Fail */
+    return 0;
+}
+
+#endif /*def USE_POSIX_PREFIX */
 
 /* gotlandmark only called by search_for_prefix, which ensures
    'prefix' is null terminated in bounds.  join() ensures
@@ -477,6 +556,9 @@ calculate_path(void)
     size_t bufsz;
     wchar_t *pythonhome = Py_GetPythonHome();
     wchar_t *envpath = NULL;
+#ifdef USE_POSIX_PREFIX
+    int pfound;
+#endif
 
 #ifdef MS_WINDOWS
     int skiphome, skipdefault;
@@ -537,6 +619,16 @@ calculate_path(void)
         }
     }
 
+#ifdef USE_POSIX_PREFIX
+    pfound = search_for_posix_prefix(argv0_path, pythonhome, NULL);
+    if (!pfound) {
+        wcsncpy(prefix, argv0_path, MAXPATHLEN);
+        reduce(prefix);
+        join(prefix, lib_python);
+    }
+    else
+        reduce(prefix);
+#else
     if (pythonhome == NULL || *pythonhome == '\0') {
         if (search_for_prefix(argv0_path, LANDMARK))
             pythonhome = prefix;
@@ -545,10 +637,10 @@ calculate_path(void)
     }
     else
         wcsncpy(prefix, pythonhome, MAXPATHLEN);
+#endif
 
     if (envpath && *envpath == '\0')
         envpath = NULL;
-
 
 #ifdef MS_WINDOWS
     /* Calculate zip archive path */
@@ -603,6 +695,9 @@ calculate_path(void)
     }
     else
         bufsz = 0;
+#ifdef USE_POSIX_PREFIX
+    bufsz += wcslen(prefix) + 1;
+#endif
     bufsz += wcslen(PYTHONPATH) + 1;
     bufsz += wcslen(argv0_path) + 1;
 #ifdef MS_WINDOWS
@@ -645,6 +740,11 @@ calculate_path(void)
         buf = wcschr(buf, L'\0');
         *buf++ = DELIM;
     }
+#ifdef USE_POSIX_PREFIX
+    wcscpy(buf, prefix);
+    buf = wcschr(buf, L'\0');
+    *buf++ = DELIM;
+#endif
     if (userpath) {
         wcscpy(buf, userpath);
         buf = wcschr(buf, L'\0');
@@ -707,6 +807,12 @@ calculate_path(void)
        on the path, and that our 'prefix' directory is
        the parent of that.
     */
+#ifdef USE_POSIX_PREFIX
+    if (pfound > 0) {
+        reduce(prefix);
+        reduce(prefix);
+    }
+#endif
     if (*prefix==L'\0') {
         wchar_t lookBuf[MAXPATHLEN+1];
         wchar_t *look = buf - 1; /* 'buf' is at the end of the buffer */
