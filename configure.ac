@@ -3602,6 +3602,27 @@ if test $ac_cv_struct_sockaddr_storage = yes; then
 	AC_DEFINE(HAVE_SOCKADDR_STORAGE, 1, [struct sockaddr_storage (sys/socket.h)])
 fi
 
+case $host in
+  *-*-mingw*)
+    dnl See Modules/posixmodule.c for details.
+    dnl Also check below distinguish wingw and mingw-w64
+    AC_MSG_CHECKING([for REPARSE_DATA_BUFFER])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+#include <windows.h>
+#include <winnt.h>
+], [
+  REPARSE_DATA_BUFFER rdb
+])],
+      [py_reparse_data_buffer=yes],
+      [py_reparse_data_buffer=no]
+    )
+    AC_MSG_RESULT([$py_reparse_data_buffer])
+    if test yes = $py_reparse_data_buffer; then
+      AC_DEFINE([HAVE_REPARSE_DATA_BUFFER],[1],[Define to 1 if you have the 'REPARSE_DATA_BUFFER' structure.])
+    fi
+  ;;
+esac
+
 # checks for compiler characteristics
 
 AC_C_CHAR_UNSIGNED

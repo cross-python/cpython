@@ -687,6 +687,9 @@
 /* Define to 1 if you have the `renameat' function. */
 #undef HAVE_RENAMEAT
 
+/* Define to 1 if you have the 'REPARSE_DATA_BUFFER' structure. */
+#undef HAVE_REPARSE_DATA_BUFFER
+
 /* Define if you have readline 2.1 */
 #undef HAVE_RL_CALLBACK
 

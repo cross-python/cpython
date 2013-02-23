@@ -1132,6 +1132,15 @@ _PyVerify_fd_dup2(int fd1, int fd2)
    http://msdn.microsoft.com/en-us/library/ms791514.aspx as the required
    include doesn't seem to be present in the Windows SDK (at least as included
    with Visual Studio Express). */
+#ifndef HAVE_REPARSE_DATA_BUFFER
+/*
+ * REPARSE_DATA_BUFFER is defined in <winnt.h> on mingw.org w32api
+ * instead as is documented in <ntifs.h>. The mingw-w64 API define
+ * it in <ddk/ntifs.h> but we can not include as header like
+ * <ntddk.h> is required instead <ddk/ntddk.h>, i.e. to use mingw-w64
+ * headers user must specify explicitly path to ddk :(.
+ * So lest check at configure time and use MSC hack if not found.
+ */
 typedef struct _REPARSE_DATA_BUFFER {
     ULONG ReparseTag;
     USHORT ReparseDataLength;
@@ -1162,7 +1171,11 @@ typedef struct _REPARSE_DATA_BUFFER {
 
 #define REPARSE_DATA_BUFFER_HEADER_SIZE  FIELD_OFFSET(REPARSE_DATA_BUFFER,\
                                                       GenericReparseBuffer)
+#ifndef MAXIMUM_REPARSE_DATA_BUFFER_SIZE
 #define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  ( 16 * 1024 )
+#endif
+
+#endif /*ndef HAVE_REPARSE_DATA_BUFFER*/
 
 static int
 win32_get_reparse_tag(HANDLE reparse_point_handle, ULONG *reparse_tag)
