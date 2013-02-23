@@ -7,7 +7,7 @@
 #include <floatingpoint.h>
 #endif
 
-#ifdef MS_WINDOWS
+#if defined(MS_WINDOWS) && !defined(__MINGW32__)
 int
 wmain(int argc, wchar_t **argv)
 {
