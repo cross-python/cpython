@@ -2540,6 +2540,14 @@ else
 fi])
 AC_MSG_RESULT($with_dbmliborder)
 
+
+# Determine if windows modules should be used.
+AC_SUBST(USE_WIN32_MODULE)
+USE_WIN32_MODULE='#'
+case $host in
+  *-*-mingw*) USE_WIN32_MODULE=;;
+esac
+
 # Determine if signalmodule should be used.
 AC_SUBST(USE_SIGNAL_MODULE)
 AC_SUBST(SIGNAL_OBJS)
