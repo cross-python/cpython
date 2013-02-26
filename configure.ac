@@ -2084,6 +2084,9 @@ if test -z "$SHLIB_SUFFIX"; then
 	CYGWIN*)   SHLIB_SUFFIX=.dll;;
 	*)	   SHLIB_SUFFIX=.so;;
 	esac
+	case $host_os in
+	mingw*)    SHLIB_SUFFIX=.dll;;
+	esac
 fi
 AC_MSG_RESULT($SHLIB_SUFFIX)
 
@@ -3058,6 +3061,12 @@ then
 	then DYNLOADFILE="dynload_shlib.o"
 	else DYNLOADFILE="dynload_stub.o"
 	fi
+	;;
+	esac
+	case $host in
+	*-*-mingw*)
+	DYNLOADFILE="dynload_win.o"
+	extra_machdep_objs="$extra_machdep_objs PC/dl_nt.o"
 	;;
 	esac
 fi
@@ -4292,6 +4301,12 @@ case $ac_sys_system in
 	EXT_SUFFIX=.${SOABI}${SHLIB_SUFFIX};;
     *)
 	EXT_SUFFIX=${SHLIB_SUFFIX};;
+esac
+case $host_os in
+    mingw*)
+	dnl Synchronized with _PyImport_DynLoadFiletab (dynload_win.c)
+	dnl Do not use more then one dot on this platform !
+	EXT_SUFFIX=-$SOABI$SHLIB_SUFFIX;;
 esac
 
 AC_MSG_CHECKING(LDVERSION)

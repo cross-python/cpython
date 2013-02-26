@@ -18,6 +18,12 @@ void _Py_DeactivateActCtx(ULONG_PTR cookie);
 #endif
 
 const char *_PyImport_DynLoadFiletab[] = {
+#ifdef EXT_SUFFIX
+    EXT_SUFFIX, /* include SOABI flags where is encoded debug */
+#endif
+#ifdef SHLIB_SUFFIX
+    "-abi" PYTHON_ABI_STRING SHLIB_SUFFIX,
+#endif
 #ifdef _DEBUG
     "_d.pyd",
 #else
@@ -27,6 +33,10 @@ const char *_PyImport_DynLoadFiletab[] = {
 };
 
 
+#if defined(__MINGW32__)
+/* avoid compile error: conflicting types for 'strcasecmp' */
+#  define strcasecmp fake_strcasecmp
+#endif
 /* Case insensitive string compare, to avoid any dependencies on particular
    C RTL implementations */
 
