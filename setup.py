@@ -762,7 +762,11 @@ class PyBuildExt(build_ext):
         exts.append( Extension('_posixsubprocess', ['_posixsubprocess.c']) )
 
         # socket(2)
+        socket_libs = []
+        if host_platform.startswith(('mingw', 'win')):
+            socket_libs += ['ws2_32']
         exts.append( Extension('_socket', ['socketmodule.c'],
+                               libraries = socket_libs,
                                depends = ['socketmodule.h']) )
         # Detect SSL support for the socket module (via _ssl)
         search_for_ssl_incs_in = [
