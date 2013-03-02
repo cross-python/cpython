@@ -40,6 +40,8 @@ def get_platform ():
     For other non-POSIX platforms, currently just returns 'sys.platform'.
     """
     if os.name == 'nt':
+        if 'GCC' in sys.version:
+            return 'mingw'
         # sniff sys.version for architecture.
         prefix = " bit ("
         i = sys.version.find(prefix)
