@@ -39,7 +39,9 @@
 
 #define WINDOWS_LEAN_AND_MEAN
 #include "windows.h"
+#if defined(Py_DEBUG)
 #include <crtdbg.h>
+#endif
 
 #if defined(MS_WIN32) && !defined(MS_WIN64)
 #define HANDLE_TO_PYNUM(handle) \
