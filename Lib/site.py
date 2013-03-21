@@ -267,6 +267,12 @@ def getusersitepackages():
             USER_SITE = get_path('purelib', 'osx_framework_user')
             return USER_SITE
 
+    if sys.platform == 'win32':
+        from sysconfig import _POSIX_BUILD
+        if _POSIX_BUILD:
+            USER_SITE = get_path('purelib', 'posix_user')
+            return USER_SITE
+
     USER_SITE = get_path('purelib', '%s_user' % os.name)
     return USER_SITE
 
@@ -298,12 +304,13 @@ def getsitepackages(prefixes=None):
     if prefixes is None:
         prefixes = PREFIXES
 
+    from sysconfig import _POSIX_BUILD
     for prefix in prefixes:
         if not prefix or prefix in seen:
             continue
         seen.add(prefix)
 
-        if os.sep == '/':
+        if _POSIX_BUILD:
             sitepackages.append(os.path.join(prefix, "lib",
                                         "python" + sys.version[:3],
                                         "site-packages"))
