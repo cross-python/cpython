@@ -264,6 +264,7 @@ def _parse_makefile(filename, vars=None):
     # if the expansion uses the name without a prefix.
     renamed_variables = ('CFLAGS', 'LDFLAGS', 'CPPFLAGS')
 
+    done['prefix']='${SYS_PREFIX}'
     while len(variables) > 0:
         for name in tuple(variables):
             value = notdone[name]
@@ -399,6 +400,19 @@ def _generate_posix_vars():
                 ' the sysconfig module\n')
         f.write('build_time_vars = ')
         pprint.pprint(vars, stream=f)
+
+    # Now reload the file and replace:
+    replacements = {": '${SYS_PREFIX}'" : ": sys.prefix",
+                    ": '${SYS_PREFIX}"  : ": sys.prefix + '",
+                     "${SYS_PREFIX}'" : "' + sys.prefix",
+                     "${SYS_PREFIX}"  : "' + sys.prefix + '"}
+
+    contents = open(destfile).read()
+    for rep in replacements.keys():
+        contents = contents.replace(rep, replacements[rep])
+    with open(destfile, 'w', encoding='utf8') as f:
+        f.write('import sys\n')
+        f.write(contents)
 
     # Create file used for sys.path fixup -- see Modules/getpath.c
     with open('pybuilddir.txt', 'w', encoding='ascii') as f:
