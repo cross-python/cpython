@@ -1711,7 +1711,7 @@ fi
 AC_HEADER_STDC
 AC_CHECK_HEADERS(asm/types.h conio.h direct.h dlfcn.h errno.h \
 fcntl.h grp.h \
-ieeefp.h io.h langinfo.h libintl.h process.h pthread.h \
+ieeefp.h io.h langinfo.h libintl.h process.h \
 sched.h shadow.h signal.h stdint.h stropts.h termios.h \
 unistd.h utime.h \
 poll.h sys/devpoll.h sys/epoll.h sys/poll.h \
@@ -2421,9 +2421,11 @@ if test $ac_cv_ntthread = yes ; then
   :
 else
 if test "$with_threads" = "yes" -o -z "$with_threads"; then
-    AC_SEARCH_LIBS(sem_init, pthread rt posix4) # 'Real Time' functions on Solaris
-						# posix4 on Solaris 2.6
-						# pthread (first!) on Linux
+    if test "$ac_cv_ntthread" = "no" -o -z "$ac_cv_ntthread"; then
+        AC_SEARCH_LIBS(sem_init, pthread rt posix4) # 'Real Time' functions on Solaris
+							# posix4 on Solaris 2.6
+							# pthread (first!) on Linux
+    fi
 fi
 fi
 
@@ -4674,6 +4676,14 @@ ac_save_cppflags="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS -I/usr/include/ncursesw"
 
 AC_CHECK_HEADERS(curses.h ncurses.h)
+
+# If using nt threads, don't look for pthread.h or thread.h
+if test "x$ac_cv_ntthread" = xno ; then
+AC_HEADER_STDC
+AC_CHECK_HEADERS(pthread.h thread.h)
+AC_HEADER_DIRENT
+AC_HEADER_MAJOR
+fi
 
 # On Solaris, term.h requires curses.h
 AC_CHECK_HEADERS(term.h,,,[
