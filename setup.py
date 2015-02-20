@@ -1880,6 +1880,10 @@ class PyBuildExt(build_ext):
         return True
 
     def configure_ctypes(self, ext):
+        if host_platform == 'win32':
+            ext.libraries.extend(['ole32', 'oleaut32', 'uuid'])
+            ext.export_symbols.extend(['DllGetClassObject PRIVATE',
+                                       'DllCanUnloadNow PRIVATE'])
         if not self.use_system_libffi:
             if host_platform == 'darwin':
                 return self.configure_ctypes_darwin(ext)
@@ -1904,6 +1908,10 @@ class PyBuildExt(build_ext):
                 if not self.verbose:
                     config_args.append("-q")
 
+                if host_platform == 'win32':
+                    table = str.maketrans('\\', '/')
+                    ffi_builddir = ffi_builddir.translate(table)
+                    ffi_srcdir = ffi_srcdir.translate(table)
                 # Pass empty CFLAGS because we'll just append the resulting
                 # CFLAGS to Python's; -g or -O2 is to be avoided.
                 cmd = "cd %s && env CFLAGS='' '%s/configure' %s" \
