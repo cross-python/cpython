@@ -14,6 +14,7 @@ extern "C" {
 #define ALTSEP L'/'
 #define MAXPATHLEN 256
 #define DELIM L';'
+#define DELIMSTR ";"
 #endif
 #endif
 
@@ -42,6 +43,7 @@ extern "C" {
 /* Search path entry delimiter */
 #ifndef DELIM
 #define DELIM L':'
+#define DELIMSTR ":"
 #endif
 
 #ifdef __cplusplus

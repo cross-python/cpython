@@ -608,6 +608,16 @@ then
 fi
 AC_MSG_RESULT($MACHDEP)
 
+# Windows uses ; to separate paths, everything else uses :
+AC_MSG_CHECKING(DELIM)
+DELIM=:
+if test "$MACHDEP" = "win"
+then
+	DELIM=\;
+fi
+AC_MSG_RESULT([$DELIM])
+AC_SUBST(DELIM)
+
 AC_MSG_CHECKING([for init system calls])
 AC_SUBST(INITSYS)
 case $host in

@@ -98,7 +98,8 @@ CFLAGSFORSHARED=@CFLAGSFORSHARED@
 # C flags used for building the interpreter object files
 PY_CORE_CFLAGS=	$(PY_CFLAGS) $(PY_CFLAGS_NODIST) $(PY_CPPFLAGS) $(CFLAGSFORSHARED) -DPy_BUILD_CORE
 
-
+# ; on Windows otherwise :
+DELIM=		@DELIM@
 # Machine-dependent subdirectories
 MACHDEP=	@MACHDEP@
 
