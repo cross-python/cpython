@@ -5016,7 +5016,7 @@ MODULE_GETPATH=Modules/getpath.o
 case $host in
   *-*-mingw*)
     dnl default sys.path calculations for windows platforms
-    MODULE_GETPATH=PC/getpathp.o
+    MODULE_GETPATH=Modules/getpath.o
     ;;
 esac
 

@@ -15,7 +15,7 @@ PyAPI_FUNC(char*) _Py_wchar2char(
     const wchar_t *text,
     size_t *error_pos);
 
-#if defined(HAVE_STAT) && !defined(MS_WINDOWS)
+#if defined(HAVE_STAT) && (!defined(MS_WINDOWS) || defined(__MINGW32__))
 PyAPI_FUNC(int) _Py_wstat(
     const wchar_t* path,
     struct stat *buf);

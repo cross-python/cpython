@@ -511,7 +511,7 @@ _Py_wchar2char(const wchar_t *text, size_t *error_pos)
    Not sure whether the MS_WINDOWS guards are necessary:
    perhaps for cygwin/mingw builds?
 */
-#if defined(HAVE_STAT) && !defined(MS_WINDOWS)
+#if defined(HAVE_STAT) && (!defined(MS_WINDOWS) || defined(__MINGW32__))
 
 /* Get file status. Encode the path to the locale encoding. */
 

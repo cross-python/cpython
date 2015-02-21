@@ -1019,7 +1019,7 @@ dir_fd_and_follow_symlinks_invalid(char *function_name, int dir_fd,
 }
 
 /* A helper used by a number of POSIX-only functions */
-#ifndef MS_WINDOWS
+#if !defined(MS_WINDOWS) || defined(__MINGW32__)
 static int
 _parse_off_t(PyObject* arg, void* addr)
 {
@@ -3689,7 +3689,7 @@ _listdir_windows_no_opendir(path_t *path, PyObject *list)
             Py_END_ALLOW_THREADS
             /* FindNextFile sets error to ERROR_NO_MORE_FILES if
                it got to the end of the directory. */
-            if (!result && GetLastError() != ERROR_NO_MORE_FILES) {
+            if (!result && GetLastError() != 0 && GetLastError() != ERROR_NO_MORE_FILES) {
                 Py_DECREF(list);
                 list = path_error(path);
                 goto exit;
@@ -3744,7 +3744,7 @@ _listdir_windows_no_opendir(path_t *path, PyObject *list)
         Py_END_ALLOW_THREADS
         /* FindNextFile sets error to ERROR_NO_MORE_FILES if
            it got to the end of the directory. */
-        if (!result && GetLastError() != ERROR_NO_MORE_FILES) {
+        if (!result && GetLastError() != 0 && GetLastError() != ERROR_NO_MORE_FILES) {
             Py_DECREF(list);
             list = path_error(path);
             goto exit;
