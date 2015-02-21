@@ -1289,7 +1289,7 @@ $(srcdir)/Lib/$(PLATDIR):
 	else \
 	  PYTHON_FOR_BUILD="$(PYTHON_FOR_BUILD)"; \
 	fi; \
-	cd $(srcdir)/Lib/$(PLATDIR); $(RUNSHARED) ./regen
+	cd $(srcdir)/Lib/$(PLATDIR); $(RUNSHARED) ./regen "$(CC)"
 
 python-config: $(srcdir)/Misc/python-config.in Misc/python-config.sh
 	# Substitution happens here, as the completely-expanded BINDIR
